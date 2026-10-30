@@ -8,6 +8,8 @@ Un episodio es una lista de escenas (dicts). Cada escena dura `dur` segundos y t
   versus    : title="...", left=("A", "valor"), right=("B", "valor")
   alert     : lines=[...], sub="..."        -> aviso urgente (borde rojo que late + reloj)
   question  : q="¿...?", options=["SÍ", "NO"]   -> pregunta para comentarios
+  trivia    : q=["¿CUÁNTOS...", "...?"], options=["A) ...", "B) ...", "C) ..."], answer=1, source=""
+              -> opciones, cuenta regresiva 3-2-1 y revela la correcta en verde (usar dur=7)
   outro     : (sin campos)  -> "SEGUÍ @misterd.coc"
 Campos comunes opcionales: color (índice de paleta 0-5), source (texto chico abajo), dur,
   bg="capturas/x.jpg"   -> fondo con una captura del juego (desenfocada, oscurecida, con zoom lento) en vez de rayos
@@ -261,6 +263,25 @@ def draw_scene(canvas, sc, lt, idx):
             c = [GREEN, RED, (30, 120, 230), (240, 130, 20)][i % 4]
             paste(canvas, pill(o, c, 64), W / 2, 1180 + i * 150, back((lt - 1.0 - 0.2 * i) / 0.3) * out)
         paste(canvas, fit("¡DEJALO EN LOS COMENTARIOS!", 58, stroke=7), W / 2, 1180 + len(sc.get("options", [])) * 150 + 40, ease_out((lt - 1.6) / 0.3) * out)
+    elif typ == "trivia":
+        paste(canvas, pill("TRIVIA", (230, 160, 0), 56, (20, 20, 30)), W / 2, 320, back((lt - 0.05) / 0.3) * out)
+        lines_stack(canvas, [(l, "w" if i == 0 else "y") for i, l in enumerate(sc["q"])], lt, 440, sizes=(92, 104), out=out)
+        reveal = sc["dur"] - 2.2
+        for i, o in enumerate(sc["options"]):
+            ok = i == sc["answer"]
+            if lt < reveal: col, a = (40, 50, 110), 1.0
+            else: col, a = (GREEN if ok else (90, 90, 110)), (1.0 if ok else 0.55)
+            pz = 1 + (0.12 * math.exp(-(lt - reveal) * 6) if (ok and lt >= reveal) else 0)
+            paste(canvas, pill(o, col, 60), W / 2, 980 + i * 165, back((lt - 0.9 - 0.25 * i) / 0.3) * out * pz, alpha=a)
+            if ok and lt >= reveal:
+                paste(canvas, icon("check", 110), W / 2 + pill(o, col, 60).width / 2 + 40, 980 + i * 165, back((lt - reveal) / 0.3) * out)
+        cd_start = reveal - 2.4
+        if cd_start <= lt < reveal:
+            n = 3 - int((lt - cd_start) / 0.8)
+            k = ((lt - cd_start) % 0.8) / 0.8
+            paste(canvas, text_img(str(max(1, n)), 220, fill=YELLOW, stroke=12), W / 2, 1480, back(k / 0.35) * (1 - ease_in((k - 0.75) / 0.25)))
+        elif lt >= reveal:
+            paste(canvas, fit("¿ACERTASTE? ¡COMENTÁ!", 70, stroke=8), W / 2, 1470, back((lt - reveal - 0.3) / 0.3) * out)
     elif typ == "outro":
         lines_stack(canvas, [("SEGUÍ PARA MÁS", "w"), ("NOVEDADES DE CLASH", "y")], lt, 640, sizes=(100, 96))
         paste(canvas, pill(HANDLE, (20, 20, 40), 80, YELLOW), W / 2, 1060, back((lt - 0.5) / 0.35) * (1 + 0.05 * math.sin(lt * 6)))
@@ -363,6 +384,11 @@ class Episode:
             if typ == "alert": add(siren(min(2.5, sc["dur"] - 0.4)), t0 + 0.3, 0.22)
             if typ == "question":
                 for k in range(len(sc.get("options", []))): add(pop(800 + 120 * k), t0 + 1.0 + 0.2 * k, 0.5)
+            if typ == "trivia":
+                for k in range(len(sc["options"])): add(pop(700 + 120 * k), t0 + 0.9 + 0.25 * k, 0.5)
+                rv = sc["dur"] - 2.2
+                for k in range(3): add(tick(), t0 + rv - 2.4 + 0.8 * k, 0.8); add(impact(0.25, 300, 90), t0 + rv - 2.4 + 0.8 * k, 0.35)
+                add(ding(), t0 + rv, 0.6); add(impact(0.7), t0 + rv, 0.8)
             if typ == "outro": add(pop(900), t0 + 0.5, 0.5); add(ding(), t0 + 0.8, 0.4)
         aud = aud / (np.abs(aud).max() + 1e-9) * 0.85
         pcm = (np.repeat(aud[:, None], 2, axis=1) * 32767).astype(np.int16)

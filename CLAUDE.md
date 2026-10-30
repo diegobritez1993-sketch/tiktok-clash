@@ -19,12 +19,19 @@ Dejar programados en Metricool **2 videos por día: 13:00 y 20:00 (America/Asunc
    - Reddit r/ClashOfClans, foros/comunidad oficial de Supercell, blog oficial supercell.com, Clash Ninja, la wiki.
    - Buscar: novedades, sneak peeks, eventos que arrancan o terminan, cambios de balance, filtraciones/rumores,
      curiosidades y debates que estén generando comentarios.
-4. **Elegir 2 temas** de pilares distintos, priorizando lo que tenga más potencial de engagement:
+4. **Elegir 2 temas** de pilares distintos, priorizando lo que tenga más potencial de engagement. Pilares de esta cuenta:
+   - **Tips** rápidos (recursos, mejoras, eventos, errores comunes, equipamiento, cosas que pocos saben).
+   - **¿Sabías que...? / curiosidades** del juego y de Supercell.
+   - **Historia de Clash** (lanzamiento, cómo llegaron ayuntamientos/héroes/tropas, actualizaciones míticas).
+   - **Humor / "¿Qué pasaría si...?"** (situaciones graciosas que todo jugador vivió, escenarios imaginarios).
+   - **Filtraciones y rumores**: SOLO con fuente identificable. En pantalla y en el texto marcarlos siempre como
+     "RUMOR" o "FILTRACIÓN" / "NO CONFIRMADO" y nombrar de dónde salió. Nunca presentarlos como hecho.
+   - **Lo que dice la comunidad / "Esto mejoraría el juego"** (debates, pedidos de la comunidad, opiniones polémicas
+     con pregunta para comentar).
    - **Novedades / eventos del mes** (fechas verificadas; prioridad si hay algo con fecha cercana).
-   - **Filtraciones y rumores**: SOLO si vienen de una fuente identificable. En pantalla y en el texto marcarlos
-     siempre como "RUMOR" o "FILTRACIÓN" / "NO CONFIRMADO" y nombrar de dónde salió. Nunca presentarlos como hecho.
-   - **Tips** (ataque, defensa, recursos, mejoras, errores comunes, equipamiento de héroes).
-   - **Historia de Clash** y **¿Sabías que...? / curiosidades**.
+   - **Trivia**: **3 por semana, los lunes, miércoles y viernes en el video de las 13:00**. 1-3 escenas `trivia`
+     (pregunta con 3 opciones, una correcta y verificada), con hook tipo "SOLO EL 1% ACIERTA ESTA".
+   **NO hacer** tutoriales de ataque ni videos de diseños/links de bases: eso lo graba Diego aparte, a mano.
    Ganchos tipo clickbait están bien ("¿SE VIENE EL TH19?", "NADIE TE DIJO ESTO", "¡OJO CON ESTO!") siempre que
    el video cumpla lo que promete el gancho: nada falso ni engañoso.
    **Verificación**: preferir supercell.com, la wiki, clash.ninja y medios serios. Nunca inventar cifras, fechas ni nombres.
@@ -34,7 +41,7 @@ Dejar programados en Metricool **2 videos por día: 13:00 y 20:00 (America/Asunc
    Fechas/horas de eventos: dar la hora de Paraguay (UTC-3) y aclarar UTC si aporta.
 5. **Escribir el episodio** en `episodios/AAAA-MM-DD_HHMM_slug.py` copiando la estructura de un episodio existente.
    - Duración 20-26 s. Escenas de 3-5 s. Empezar SIEMPRE con un `hook` fuerte (pregunta o dato que sorprenda).
-   - Tipos de escena del motor: `hook`, `stat`, `change`, `list`, `versus`, `alert`, `question`, `outro`
+   - Tipos de escena del motor: `hook`, `stat`, `change`, `list`, `versus`, `alert`, `question`, `trivia`, `outro`
      (ver docstring de `motor/clash_engine.py`). Variar tipos y colores entre videos; no repetir la misma estructura.
    - Terminar con `question` (para comentarios) en al menos 1 de los 2 videos del día, y siempre con `outro`.
    - `source="..."` en la escena donde aparece el dato (texto chico abajo).
@@ -44,8 +51,9 @@ Dejar programados en Metricool **2 videos por día: 13:00 y 20:00 (America/Asunc
      `Episode` y poner al menos una `card="capturas/..."` (idealmente en el hook). El motor agrega solo la etiqueta
      "CLASH OF CLANS" en la primera escena. Dinámico: variar fondos, tarjetas y tipos de escena.
    - **Prohibido**: descargar arte oficial, logos, personajes o capturas de otros desde internet, o dibujar personajes
-     del juego. Las únicas imágenes del juego son las de `capturas/`. Si hacen falta capturas nuevas para un tema,
-     avisarle a Diego en el resumen para que las mande.
+     del juego. Las únicas imágenes del juego son las de `capturas/` (capturas propias de Diego y, cuando las mande,
+     el kit oficial de creador de Supercell en `capturas/kit_creador/`). Preferir imágenes del kit cuando tengan
+     relación directa con el tema. Si hacen falta imágenes nuevas para un tema, avisarle a Diego en el resumen.
 6. **Revisar antes de renderizar**: `python episodios/X.py preview /tmp/prev` (un cuadro por escena) y MIRAR `hoja.jpg`
    con Read. Corregir textos encimados, cortados o fuera de pantalla. Recién ahí:
    `python episodios/X.py build publicados/<mismo-nombre>.mp4`.
