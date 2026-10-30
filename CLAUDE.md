@@ -13,14 +13,22 @@ Dejar programados en Metricool **2 videos por día: 13:00 y 20:00 (America/Asunc
    ya están ocupados (ignorar los posts de YouTube). Producir un video por cada horario libre de HOY (13:00 / 20:00)
    que todavía no haya pasado; si los dos de hoy ya están ocupados o pasaron, producir para los libres de mañana.
    Máximo 2 videos por ejecución. Nunca duplicar un horario.
-3. **Elegir temas** alternando estos pilares (los 2 del día de pilares distintos):
-   - **Eventos y novedades del mes**: eventos que empiezan/terminan, temporada, Liga de Clanes (CWL), juegos del clan,
-     sneak peeks, cambios de balance, mantenimiento. Siempre con fechas verificadas. Prioridad si hay algo con fecha cercana.
-   - **Tips**: estrategia de ataque/defensa, gestión de recursos, mejoras, errores comunes, equipamiento de héroes.
-   - **Historia de Clash**: lanzamiento del juego, cómo llegaron los ayuntamientos/héroes, actualizaciones históricas.
-   - **¿Sabías que...? / curiosidades**: datos raros o poco conocidos del juego o de Supercell.
-4. **Verificar todo con WebSearch/WebFetch**: preferir supercell.com (blog de Clash of Clans), Clash of Clans Wiki (fandom),
-   clash.ninja y medios serios. Nunca inventar cifras, fechas ni nombres. Si un dato no se puede confirmar, no usarlo.
+3. **Investigar qué está pasando en Clash** (antes de elegir temas), con WebSearch/WebFetch:
+   - X/Twitter: cuenta oficial de Clash of Clans y creadores/insiders conocidos (buscar "Clash of Clans" + "sneak peek",
+     "leak", "Town Hall 19", "update", "maintenance" de los últimos días).
+   - Reddit r/ClashOfClans, foros/comunidad oficial de Supercell, blog oficial supercell.com, Clash Ninja, la wiki.
+   - Buscar: novedades, sneak peeks, eventos que arrancan o terminan, cambios de balance, filtraciones/rumores,
+     curiosidades y debates que estén generando comentarios.
+4. **Elegir 2 temas** de pilares distintos, priorizando lo que tenga más potencial de engagement:
+   - **Novedades / eventos del mes** (fechas verificadas; prioridad si hay algo con fecha cercana).
+   - **Filtraciones y rumores**: SOLO si vienen de una fuente identificable. En pantalla y en el texto marcarlos
+     siempre como "RUMOR" o "FILTRACIÓN" / "NO CONFIRMADO" y nombrar de dónde salió. Nunca presentarlos como hecho.
+   - **Tips** (ataque, defensa, recursos, mejoras, errores comunes, equipamiento de héroes).
+   - **Historia de Clash** y **¿Sabías que...? / curiosidades**.
+   Ganchos tipo clickbait están bien ("¿SE VIENE EL TH19?", "NADIE TE DIJO ESTO", "¡OJO CON ESTO!") siempre que
+   el video cumpla lo que promete el gancho: nada falso ni engañoso.
+   **Verificación**: preferir supercell.com, la wiki, clash.ninja y medios serios. Nunca inventar cifras, fechas ni nombres.
+   Si un dato no se puede confirmar, no usarlo como hecho (a lo sumo como rumor con fuente).
    Nombres de tropas/hechizos/equipamiento en **español tal como aparecen en el juego** (ej. "Flecha congelada",
    "Supermontapuercos", "Gólem meteórico"). Si no estás seguro del nombre en español, reformular sin nombrarlo.
    Fechas/horas de eventos: dar la hora de Paraguay (UTC-3) y aclarar UTC si aporta.
@@ -31,7 +39,13 @@ Dejar programados en Metricool **2 videos por día: 13:00 y 20:00 (America/Asunc
    - Terminar con `question` (para comentarios) en al menos 1 de los 2 videos del día, y siempre con `outro`.
    - `source="..."` en la escena donde aparece el dato (texto chico abajo).
    - Titulares en MAYÚSCULAS y cortos; ítems de lista de máximo ~28 caracteres.
-   - **Prohibido**: personajes, logos, capturas o arte de Clash of Clans/Supercell. Solo texto, formas e íconos del motor.
+   - **Imágenes de Clash (SIEMPRE)**: cada video debe verse claramente de Clash of Clans. Usar las capturas propias
+     de Diego de `capturas/` (ver `capturas/INDICE.md`): pasar `bg_pool=[3-4 capturas relacionadas al tema]` al
+     `Episode` y poner al menos una `card="capturas/..."` (idealmente en el hook). El motor agrega solo la etiqueta
+     "CLASH OF CLANS" en la primera escena. Dinámico: variar fondos, tarjetas y tipos de escena.
+   - **Prohibido**: descargar arte oficial, logos, personajes o capturas de otros desde internet, o dibujar personajes
+     del juego. Las únicas imágenes del juego son las de `capturas/`. Si hacen falta capturas nuevas para un tema,
+     avisarle a Diego en el resumen para que las mande.
 6. **Revisar antes de renderizar**: `python episodios/X.py preview /tmp/prev` (un cuadro por escena) y MIRAR `hoja.jpg`
    con Read. Corregir textos encimados, cortados o fuera de pantalla. Recién ahí:
    `python episodios/X.py build publicados/<mismo-nombre>.mp4`.

@@ -9,9 +9,14 @@ Un episodio es una lista de escenas (dicts). Cada escena dura `dur` segundos y t
   alert     : lines=[...], sub="..."        -> aviso urgente (borde rojo que late + reloj)
   question  : q="¿...?", options=["SÍ", "NO"]   -> pregunta para comentarios
   outro     : (sin campos)  -> "SEGUÍ @misterd.coc"
-Campos comunes opcionales: color (índice de paleta 0-5), source (texto chico abajo), dur.
+Campos comunes opcionales: color (índice de paleta 0-5), source (texto chico abajo), dur,
+  bg="capturas/x.jpg"   -> fondo con una captura del juego (desenfocada, oscurecida, con zoom lento) en vez de rayos
+  card="capturas/x.jpg" -> tarjeta con la captura (marco blanco, entra con rebote y hace zoom); card_y = centro vertical
+Episode(..., bg_pool=[...]) asigna capturas de fondo a las escenas que no tengan `bg` (rotando).
+La primera escena muestra arriba la etiqueta "CLASH OF CLANS" (texto) para que se note de qué es el video.
 
-Reglas de estilo: SIN personajes, logos ni arte del juego. Solo texto, formas e íconos simples dibujados acá.
+Reglas de estilo: las ÚNICAS imágenes del juego permitidas son las capturas propias de Diego en `capturas/`.
+No descargar arte oficial, logos ni personajes de internet, ni dibujarlos. Íconos: solo los simples de este motor.
 Uso:  python episodios/X.py preview DIR t1 t2 ...   |   python episodios/X.py build publicados/X.mp4
 """
 import math, os, random, subprocess, sys, wave
@@ -134,6 +139,59 @@ def background(ci, t):
         d.ellipse((px - r, py - r, px + r, py + r), fill=(255, 240, 180, max(0, a)))
     return img
 
+# ---------------- capturas de Diego ----------------
+ROOT = os.path.dirname(HERE)
+_imgs = {}
+def load_cap(path):
+    if path not in _imgs:
+        full = path if os.path.isabs(path) else os.path.join(ROOT, path)
+        _imgs[path] = Image.open(full).convert("RGB")
+    return _imgs[path]
+_bgs = {}
+def cap_background(path, ci, t, lt):
+    key = (path, ci)
+    if key not in _bgs:
+        im = load_cap(path)
+        sc = max(W / im.width, H / im.height) * 1.15
+        im = im.resize((int(im.width * sc), int(im.height * sc)), Image.LANCZOS)
+        im = im.crop(((im.width - int(W * 1.15)) // 2, (im.height - int(H * 1.15)) // 2,
+                      (im.width - int(W * 1.15)) // 2 + int(W * 1.15), (im.height - int(H * 1.15)) // 2 + int(H * 1.15)))
+        im = im.filter(ImageFilter.GaussianBlur(6))
+        arr = np.asarray(im).astype(np.float32)
+        tint = np.array(PALETTE[ci % len(PALETTE)][1], np.float32)
+        arr = arr * 0.42 + tint * 0.30
+        _bgs[key] = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8))
+    big = _bgs[key]; z = 1.0 + 0.04 * min(lt, 5) / 5
+    cw, ch = int(big.width / 1.15 / z), int(big.height / 1.15 / z)
+    x0 = (big.width - cw) // 2 + int(30 * math.sin(t * 0.3)); y0 = (big.height - ch) // 2
+    img = big.crop((x0, y0, x0 + cw, y0 + ch)).resize((W, H), Image.BILINEAR)
+    arr = np.asarray(img).astype(np.float32)
+    rays = (np.sin(ANG * 12 + t * 0.9) > 0.15).astype(np.float32)[..., None]
+    arr = (arr + rays * RAD * 22) * VIGN
+    img = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8)).convert("RGBA")
+    d = ImageDraw.Draw(img)
+    for x, y, sp, r, ph in PARTS[:25]:
+        py = (y - t * sp) % H; px = x + math.sin(t * 1.5 + ph) * 20
+        d.ellipse((px - r, py - r, px + r, py + r), fill=(255, 240, 180, 150))
+    return img
+_cards = {}
+def cap_card(path, width=900):
+    key = (path, width)
+    if key not in _cards:
+        im = load_cap(path)
+        h = int(im.height * width / im.width)
+        if h > 700: width = int(width * 700 / h); h = 700
+        im = im.resize((width, h), Image.LANCZOS).convert("RGBA")
+        fr = Image.new("RGBA", (width + 24, h + 24), (0, 0, 0, 255))
+        ImageDraw.Draw(fr).rounded_rectangle((5, 5, width + 18, h + 18), radius=12, fill=(255, 255, 255, 255))
+        fr.alpha_composite(im, (12, 12)); _cards[key] = fr
+    return _cards[key]
+CLASH_TAG = None
+def clash_tag():
+    global CLASH_TAG
+    if CLASH_TAG is None: CLASH_TAG = pill("CLASH OF CLANS", (230, 160, 0), 46, (20, 20, 30))
+    return CLASH_TAG
+
 # ---------------- escenas ----------------
 def lines_stack(canvas, lines, lt, y0, sizes=(118, 150), gap=-14, delay=0.14, start=0.15, out=1.0, wob=True):
     y = y0
@@ -207,15 +265,24 @@ def draw_scene(canvas, sc, lt, idx):
         lines_stack(canvas, [("SEGUÍ PARA MÁS", "w"), ("NOVEDADES DE CLASH", "y")], lt, 640, sizes=(100, 96))
         paste(canvas, pill(HANDLE, (20, 20, 40), 80, YELLOW), W / 2, 1060, back((lt - 0.5) / 0.35) * (1 + 0.05 * math.sin(lt * 6)))
         paste(canvas, icon("star", 150), W / 2, 1300, back((lt - 0.8) / 0.35), rot=10 * math.sin(lt * 3))
+    if sc.get("card"):
+        cd = cap_card(sc["card"])
+        e = back((lt - sc.get("card_t", 0.5)) / 0.35, 1.8)
+        z = 1 + 0.05 * clamp(lt / max(dur, 0.1))
+        paste(canvas, cd, W / 2, sc.get("card_y", 1300), e * out * z, rot=2 * math.sin(lt * 1.6))
+    if idx == 0:
+        paste(canvas, clash_tag(), W / 2, 200, back((lt - 0.05) / 0.3) * out)
     if sc.get("source"):
         paste(canvas, fit("Fuente: " + sc["source"], 34, stroke=5, font=FM, fill=GREY), W / 2, 1585, ease_out((lt - 0.8) / 0.3) * out)
 
 # ---------------- render ----------------
 class Episode:
-    def __init__(self, scenes, title=""):
-        self.scenes = []; t = 0.0
+    def __init__(self, scenes, title="", bg_pool=None):
+        self.scenes = []; t = 0.0; k = 0
         for i, sc in enumerate(scenes):
             sc = dict(sc); sc.setdefault("dur", 4.0); sc.setdefault("color", i)
+            if bg_pool and "bg" not in sc and sc["type"] != "outro":
+                sc["bg"] = bg_pool[k % len(bg_pool)]; k += 1
             sc["t0"] = t; t += sc["dur"]; self.scenes.append(sc)
         self.total = t; self.title = title
     def scene_at(self, t):
@@ -223,7 +290,7 @@ class Episode:
             if t < sc["t0"] + sc["dur"] or i == len(self.scenes) - 1: return i, sc
     def frame(self, t):
         i, sc = self.scene_at(t); lt = t - sc["t0"]
-        canvas = background(sc["color"], t)
+        canvas = cap_background(sc["bg"], sc["color"], t, lt) if sc.get("bg") else background(sc["color"], t)
         # zoom-in de escena (cámara) + temblor al entrar
         draw_scene(canvas, sc, lt, i)
         if sc["type"] == "alert":
