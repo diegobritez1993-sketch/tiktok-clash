@@ -41,9 +41,11 @@ Dejar programados en Metricool **2 videos por día: 13:00 y 20:00 (America/Asunc
 8. **Programar** con `createScheduledPost` (blogId `7762882`), fecha con offset -03:00:
    - providers `[{"network":"tiktok"}]` — SOLO tiktok. media `[<url raw>]`, autoPublish true, draft false.
    - `tiktokData`: `{"privacyOption":"PUBLIC_TO_EVERYONE","title":<título>,"isAigc":true,"disableComment":false,"disableDuet":false,"disableStitch":false,"autoAddMusic":false,"commercialContentThirdParty":false,"commercialContentOwnBrand":false}`
-   - **Título**: máx ~60 caracteres, gancho + 1-2 emojis, voseo.
-   - `text`: 1-2 frases + pregunta para comentar + (si hay dato) "Fuente: ..." + hashtags:
-     siempre `#clashofclans #coc` + 2-3 del tema (ej. `#clashtips #cwl #supercell #th18`).
+   - **Título (SIEMPRE, obligatorio)**: adecuado al contenido del video, que diga de qué trata y enganche;
+     máx ~60 caracteres, 1-2 emojis, voseo. Nunca genérico ni repetido.
+   - `text`: 1-2 frases + pregunta para comentar + (si hay dato) "Fuente: ..." + hashtags.
+   - **Hashtags: EXACTAMENTE 3**, al final del texto. El primero SIEMPRE `#clashofclans`; los otros 2 relacionados
+     con el tema del video (ej. `#clashofclans #cwl #clashtips`, `#clashofclans #cambiosdebalance #supercell`).
 9. Agregar una fila por video a `historial.md` y hacer push.
 10. Mandar al usuario (SendUserMessage) un resumen corto: títulos, horarios y link del planner de Metricool.
 
