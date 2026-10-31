@@ -296,9 +296,67 @@ def draw_scene(canvas, sc, lt, idx):
     if sc.get("source"):
         paste(canvas, fit("Fuente: " + sc["source"], 34, stroke=5, font=FM, fill=GREY), W / 2, 1585, ease_out((lt - 0.8) / 0.3) * out)
 
+# ---------------- música de fondo original (chiptune gaming) ----------------
+MUSIC_FROM = "2026-11-01"   # la música se activa automáticamente desde esta fecha (hora de Paraguay)
+def music_enabled():
+    import datetime
+    now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=-3))).date().isoformat()
+    return now >= MUSIC_FROM
+
+def make_music(total, seed, SR=44100):
+    """Loop alegre tipo chiptune/gaming generado acá (sin samples ni temas de terceros)."""
+    rng = random.Random(seed)
+    bpm = rng.choice([124, 126, 128, 130]); beat = 60 / bpm; n = int(SR * (total + 0.5))
+    out = np.zeros(n, np.float32)
+    root = rng.choice([57, 58, 60, 62, 63, 65])            # tonalidad (MIDI)
+    progs = [[0, 7, 9, 5], [0, 5, 9, 7], [9, 5, 0, 7], [0, 9, 5, 7]]
+    prog = rng.choice(progs)
+    def hz(m): return 440.0 * 2 ** ((m - 69) / 12)
+    def env(m, a=0.005, r=0.08):
+        t = np.arange(m) / SR; return np.minimum(1, t / a) * np.exp(-t / r)
+    def sq(f, m, duty=0.5):
+        t = np.arange(m) / SR; return np.where((t * f) % 1 < duty, 1.0, -1.0)
+    def put(sig, at, g):
+        i = int(at * SR)
+        if i >= n: return
+        k = min(len(sig), n - i); out[i:i + k] += (sig[:k] * g).astype(np.float32)
+    nr = np.random.default_rng(seed)
+    bars = int(total / (beat * 4)) + 2
+    arp_pat = rng.choice([[0, 4, 7, 12, 7, 4, 0, 4], [0, 7, 12, 7, 4, 7, 12, 16], [0, 4, 7, 4, 12, 7, 4, 7]])
+    for b in range(bars):
+        ch = root + prog[b % 4]
+        minor = prog[b % 4] == 9
+        third = 3 if minor else 4
+        for k in range(16):                                 # semicorcheas
+            t0 = (b * 16 + k) * beat / 4
+            if t0 > total: break
+            if k % 4 == 0:                                  # bombo
+                m = int(SR * 0.18); tt = np.arange(m) / SR
+                put(np.sin(2 * np.pi * np.cumsum(50 + 110 * np.exp(-tt * 35)) / SR) * np.exp(-tt * 18), t0, 0.9)
+            if k % 8 == 4:                                  # clap
+                m = int(SR * 0.12); put(nr.standard_normal(m) * env(m, 0.002, 0.04), t0, 0.35)
+            if k % 2 == 1:                                  # hi-hat
+                m = int(SR * 0.04); put(np.diff(nr.standard_normal(m + 1)) * env(m, 0.001, 0.012), t0, 0.12)
+            if k % 2 == 0:                                  # bajo
+                m = int(SR * beat / 2 * 0.9); f = hz(ch - 24 + (12 if k % 4 == 2 else 0))
+                t = np.arange(m) / SR; tri = 2 * np.abs(2 * ((t * f) % 1) - 1) - 1
+                put(tri * env(m, 0.004, 0.18), t0, 0.32)
+            iv = arp_pat[k % 8]; iv = third if iv == 4 else (third + 12 if iv == 16 else iv)
+            m = int(SR * beat / 4 * 0.95)                   # arpegio (cuadrada)
+            put(sq(hz(ch + 12 + iv), m, 0.25) * env(m, 0.003, 0.07), t0, 0.07)
+        if b % 2 == 1:                                      # melodía simple cada 2 compases
+            for j, iv in enumerate(rng.sample([0, 2, 4, 7, 9, 12], 4)):
+                t0 = (b * 16 + j * 4) * beat / 4; m = int(SR * beat * 0.9)
+                put(sq(hz(ch + 24 + (third if iv == 4 else iv)), m, 0.5) * env(m, 0.01, 0.25), t0, 0.05)
+    # "ducking" bajo los bombos + fades
+    t = np.arange(n) / SR; ph = (t % beat) / beat
+    out *= (0.65 + 0.35 * np.minimum(1, ph / 0.35))
+    out *= np.minimum(1, t / 0.6) * np.minimum(1, np.maximum(0, total - t) / 1.2)
+    return out / (np.abs(out).max() + 1e-9)
+
 # ---------------- render ----------------
 class Episode:
-    def __init__(self, scenes, title="", bg_pool=None):
+    def __init__(self, scenes, title="", bg_pool=None, music=None):
         self.scenes = []; t = 0.0; k = 0
         for i, sc in enumerate(scenes):
             sc = dict(sc); sc.setdefault("dur", 4.0); sc.setdefault("color", i)
@@ -306,6 +364,7 @@ class Episode:
                 sc["bg"] = bg_pool[k % len(bg_pool)]; k += 1
             sc["t0"] = t; t += sc["dur"]; self.scenes.append(sc)
         self.total = t; self.title = title
+        self.music = music_enabled() if music is None else music
     def scene_at(self, t):
         for i, sc in enumerate(self.scenes):
             if t < sc["t0"] + sc["dur"] or i == len(self.scenes) - 1: return i, sc
@@ -390,6 +449,11 @@ class Episode:
                 for k in range(3): add(tick(), t0 + rv - 2.4 + 0.8 * k, 0.8); add(impact(0.25, 300, 90), t0 + rv - 2.4 + 0.8 * k, 0.35)
                 add(ding(), t0 + rv, 0.6); add(impact(0.7), t0 + rv, 0.8)
             if typ == "outro": add(pop(900), t0 + 0.5, 0.5); add(ding(), t0 + 0.8, 0.4)
+        aud = aud / (np.abs(aud).max() + 1e-9)
+        if self.music:
+            mus = make_music(self.total, __import__("zlib").crc32((self.title or "clash").encode()) % 100000, SR)
+            aud = aud * 0.8 + mus[:n] * 0.28
+            aud = np.tanh(aud * 1.1)
         aud = aud / (np.abs(aud).max() + 1e-9) * 0.85
         pcm = (np.repeat(aud[:, None], 2, axis=1) * 32767).astype(np.int16)
         with wave.open(path, "wb") as wf:

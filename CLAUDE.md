@@ -45,6 +45,8 @@ Dejar programados en Metricool **2 videos por día: 13:00 y 20:00 (America/Asunc
      (ver docstring de `motor/clash_engine.py`). Variar tipos y colores entre videos; no repetir la misma estructura.
    - Terminar con `question` (para comentarios) en al menos 1 de los 2 videos del día, y siempre con `outro`.
    - `source="..."` en la escena donde aparece el dato (texto chico abajo).
+   - **Audio: SIEMPRE música de fondo + efectos de sonido.** El motor genera solo una música gaming original y alegre
+     (activa automáticamente desde el 01/11/2026) y los efectos de cada escena. No pasar `music=False` nunca.
    - Titulares en MAYÚSCULAS y cortos; ítems de lista de máximo ~28 caracteres.
    - **Imágenes de Clash (SIEMPRE)**: cada video debe verse claramente de Clash of Clans. Usar las capturas propias
      de Diego de `capturas/` (ver `capturas/INDICE.md`): pasar `bg_pool=[3-4 capturas relacionadas al tema]` al
