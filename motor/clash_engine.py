@@ -14,10 +14,15 @@ Un episodio es una lista de escenas (dicts). Cada escena dura `dur` segundos y t
 Campos comunes opcionales: color (índice de paleta 0-5), source (texto chico abajo), dur,
   bg="capturas/x.jpg"   -> fondo con una captura del juego (desenfocada, oscurecida, con zoom lento) en vez de rayos
   card="capturas/x.jpg" -> tarjeta con la captura (marco blanco, entra con rebote y hace zoom); card_y = centro vertical
+                           (si la imagen es PNG transparente se dibuja como sticker, sin marco)
+  sticker="capturas/kit_creador/x.png" -> PNG transparente del kit de creador, sin marco, con sombra + brillo,
+                           entra con rebote y flota. sticker_x / sticker_y = centro, sticker_h = alto máx (def. 520),
+                           sticker_t = segundo de entrada, sticker_flip=True lo espeja.
 Episode(..., bg_pool=[...]) asigna capturas de fondo a las escenas que no tengan `bg` (rotando).
 La primera escena muestra arriba la etiqueta "CLASH OF CLANS" (texto) para que se note de qué es el video.
 
-Reglas de estilo: las ÚNICAS imágenes del juego permitidas son las capturas propias de Diego en `capturas/`.
+Reglas de estilo: las ÚNICAS imágenes del juego permitidas son las de `capturas/` (capturas propias de Diego y el
+kit oficial de creador de Supercell en `capturas/kit_creador/`, ver INDICE.md).
 No descargar arte oficial, logos ni personajes de internet, ni dibujarlos. Íconos: solo los simples de este motor.
 Uso:  python episodios/X.py preview DIR t1 t2 ...   |   python episodios/X.py build publicados/X.mp4
 """
@@ -144,16 +149,24 @@ def background(ci, t):
 # ---------------- capturas de Diego ----------------
 ROOT = os.path.dirname(HERE)
 _imgs = {}
-def load_cap(path):
+def load_rgba(path):
     if path not in _imgs:
         full = path if os.path.isabs(path) else os.path.join(ROOT, path)
-        _imgs[path] = Image.open(full).convert("RGB")
+        _imgs[path] = Image.open(full).convert("RGBA")
     return _imgs[path]
+def has_alpha(path):
+    return load_rgba(path).getchannel("A").getextrema()[0] < 250
+def load_cap(path, under=(18, 18, 30)):
+    """RGB; si es transparente se apoya sobre un color liso (para fondos)."""
+    im = load_rgba(path)
+    if not has_alpha(path): return im.convert("RGB")
+    base = Image.new("RGBA", im.size, under + (255,)); base.alpha_composite(im)
+    return base.convert("RGB")
 _bgs = {}
 def cap_background(path, ci, t, lt):
     key = (path, ci)
     if key not in _bgs:
-        im = load_cap(path)
+        im = load_cap(path, tuple(int(v * 0.5) for v in PALETTE[ci % len(PALETTE)][1]))
         sc = max(W / im.width, H / im.height) * 1.15
         im = im.resize((int(im.width * sc), int(im.height * sc)), Image.LANCZOS)
         im = im.crop(((im.width - int(W * 1.15)) // 2, (im.height - int(H * 1.15)) // 2,
@@ -176,8 +189,29 @@ def cap_background(path, ci, t, lt):
         py = (y - t * sp) % H; px = x + math.sin(t * 1.5 + ph) * 20
         d.ellipse((px - r, py - r, px + r, py + r), fill=(255, 240, 180, 150))
     return img
+_stk = {}
+def cap_sticker(path, maxh=520, maxw=900, flip=False):
+    """PNG transparente con sombra y halo claro, listo para pegar."""
+    key = (path, maxh, maxw, flip)
+    if key not in _stk:
+        im = load_rgba(path)
+        sc = min(maxh / im.height, maxw / im.width)
+        im = im.resize((max(1, int(im.width * sc)), max(1, int(im.height * sc))), Image.LANCZOS)
+        if flip: im = im.transpose(Image.FLIP_LEFT_RIGHT)
+        pad = 40
+        out = Image.new("RGBA", (im.width + 2 * pad, im.height + 2 * pad), (0, 0, 0, 0))
+        a = im.getchannel("A")
+        glow = Image.new("RGBA", out.size, (255, 230, 150, 0)); ga = Image.new("L", out.size, 0)
+        ga.paste(a, (pad, pad)); ga = ga.filter(ImageFilter.GaussianBlur(14)).point(lambda v: int(v * 0.55))
+        glow.putalpha(ga); out.alpha_composite(glow)
+        sh = Image.new("RGBA", out.size, (0, 0, 0, 0)); sa = Image.new("L", out.size, 0)
+        sa.paste(a, (pad + 10, pad + 18)); sa = sa.filter(ImageFilter.GaussianBlur(10)).point(lambda v: int(v * 0.6))
+        sh.putalpha(sa); out.alpha_composite(sh)
+        out.alpha_composite(im, (pad, pad)); _stk[key] = out
+    return _stk[key]
 _cards = {}
 def cap_card(path, width=900):
+    if has_alpha(path): return cap_sticker(path, 620, width)
     key = (path, width)
     if key not in _cards:
         im = load_cap(path)
@@ -291,6 +325,11 @@ def draw_scene(canvas, sc, lt, idx):
         e = back((lt - sc.get("card_t", 0.5)) / 0.35, 1.8)
         z = 1 + 0.05 * clamp(lt / max(dur, 0.1))
         paste(canvas, cd, W / 2, sc.get("card_y", 1300), e * out * z, rot=2 * math.sin(lt * 1.6))
+    if sc.get("sticker"):
+        st = cap_sticker(sc["sticker"], sc.get("sticker_h", 520), 900, sc.get("sticker_flip", False))
+        e = back((lt - sc.get("sticker_t", 0.35)) / 0.35, 2.0)
+        bob = 14 * math.sin(lt * 2.4)
+        paste(canvas, st, sc.get("sticker_x", W / 2), sc.get("sticker_y", 1300) + bob, e * out, rot=3 * math.sin(lt * 1.3))
     if idx == 0:
         paste(canvas, clash_tag(), W / 2, 200, back((lt - 0.05) / 0.3) * out)
     if sc.get("source"):

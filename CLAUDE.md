@@ -52,6 +52,13 @@ Dejar programados en Metricool **2 videos por día: 13:00 y 20:00 (America/Asunc
      de Diego de `capturas/` (ver `capturas/INDICE.md`): pasar `bg_pool=[3-4 capturas relacionadas al tema]` al
      `Episode` y poner al menos una `card="capturas/..."` (idealmente en el hook). El motor agrega solo la etiqueta
      "CLASH OF CLANS" en la primera escena. Dinámico: variar fondos, tarjetas y tipos de escena.
+   - **Kit de creador (`capturas/kit_creador/`, ver su `INDICE.md`)**: cuando haya una imagen relacionada al tema, USARLA.
+     PNG transparentes → `sticker="capturas/kit_creador/x.png"` (sin marco, con sombra, entra con rebote y flota;
+     `sticker_x`, `sticker_y`, `sticker_h`, `sticker_t`, `sticker_flip`). Ideal: un sticker en el hook y 1-2 más en otras
+     escenas, ubicados donde no tapen texto (y≈1200-1400 o a un costado con sticker_x≈800 y sticker_h≈420).
+     JPG con fondo (artes de aniversario, humor manga, etc.) → `bg_pool` o `card=`. Mezclar kit + capturas de Diego.
+     Los artes de humor (bárbaro en el cine, rey en el espejo, bárbaro y rey asustados) son ideales para el pilar Humor.
+     Lo de WWE solo para temas de esa colab. No nombrar en pantalla personajes cuyo nombre en español no esté verificado.
    - **Prohibido**: descargar arte oficial, logos, personajes o capturas de otros desde internet, o dibujar personajes
      del juego. Las únicas imágenes del juego son las de `capturas/` (capturas propias de Diego y, cuando las mande,
      el kit oficial de creador de Supercell en `capturas/kit_creador/`). Preferir imágenes del kit cuando tengan
