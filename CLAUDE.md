@@ -80,6 +80,13 @@ Dejar programados en Metricool **2 videos por día: 13:00 y 20:00 (America/Asunc
    - `text`: 1-2 frases + pregunta para comentar + (si hay dato) "Fuente: ..." + hashtags.
    - **Hashtags: EXACTAMENTE 3**, al final del texto. El primero SIEMPRE `#clashofclans`; los otros 2 relacionados
      con el tema del video (ej. `#clashofclans #cwl #clashtips`, `#clashofclans #cambiosdebalance #supercell`).
+   - **Plan gratis de Metricool (20 publicaciones/mes, compartidas con el YouTube del otro nicho)**: si `createScheduledPost`
+     falla por límite/cupo/plan (o cualquier rechazo), NO reintentar. Pasar a **modo manual**: el video ya está en el repo;
+     mandarlo con `SendUserFile` (el .mp4, para que Diego lo descargue en el celular) y con `SendUserMessage` un mensaje
+     listo para copiar: hora a la que tiene que subirlo (13:00 o 20:00), TÍTULO, TEXTO completo con los 3 hashtags,
+     el link raw del mp4 y el recordatorio de marcar "contenido generado con IA" en TikTok. En historial.md poner
+     "MANUAL" en la columna Hora junto a la hora. Si el cupo ya se agotó ese mes (un rechazo anterior en historial),
+     ir directo a modo manual sin intentar Metricool. El cupo se renueva al empezar cada mes.
 9. Agregar una fila por video a `historial.md` y hacer push.
 10. Mandar al usuario (SendUserMessage) un resumen corto: títulos, horarios y link del planner de Metricool.
 
