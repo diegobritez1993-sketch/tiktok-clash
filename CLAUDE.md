@@ -8,7 +8,8 @@ motion graphics con texto + efectos de sonido, generados con `motor/clash_engine
 
 ## Tarea diaria (cada ejecución programada)
 Dejar programados en Metricool **2 videos por día: 13:00 y 20:00 (America/Asuncion)**, solo en TikTok.
-1. `git pull`. Leer este archivo y `historial.md` completo (no repetir tema, dato ni gancho).
+1. `git pull`. Leer este archivo, `historial.md` completo (no repetir tema, dato ni gancho) y el calendario oficial
+   del mes en `calendario/AAAA-MM.md` si existe (fechas de eventos confirmadas por Supercell: base para temas de eventos).
 2. Revisar con `getScheduledPosts` (brandId 7762882, timezone America/Asuncion, hoy y mañana) qué horarios de **TikTok**
    ya están ocupados (ignorar los posts de YouTube). Producir un video por cada horario libre de HOY (13:00 / 20:00)
    que todavía no haya pasado; si los dos de hoy ya están ocupados o pasaron, producir para los libres de mañana.
