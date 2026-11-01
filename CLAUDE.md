@@ -4,7 +4,9 @@ Cuenta de TikTok de Diego (Paraguay, zona America/Asuncion), creador de Clash of
 Español rioplatense/paraguayo con voseo ("mirá", "tenés", "dejalo"). Videos verticales 1080x1920, sin cara ni voz:
 motion graphics con texto + efectos de sonido, generados con `motor/clash_engine.py`.
 
-**SOLO TikTok.** Nunca programar estos videos en YouTube ni en otra red (YouTube es otro canal y otro nicho).
+**SOLO TikTok.** Nunca programar estos videos en YouTube ni en otra red: el YouTube de la marca 7762882 es otro canal
+y otro nicho. PENDIENTE: Diego va a crear una segunda marca en Metricool con su canal de YouTube de Clash; cuando pase
+dato del nuevo brandId, se suben los MISMOS videos también como Shorts ahí (solo en esa marca nueva, nunca en la 7762882).
 
 ## Tarea diaria (cada ejecución programada)
 Dejar programados en Metricool **2 videos por día: 13:00 y 20:00 (America/Asuncion)**, solo en TikTok.
