@@ -89,6 +89,14 @@ Dejar programados en Metricool **2 videos por día: 13:00 y 20:00 (America/Asunc
      ir directo a modo manual sin intentar Metricool. El cupo se renueva al empezar cada mes.
 9. Agregar una fila por video a `historial.md` y hacer push.
 10. Mandar al usuario (SendUserMessage) un resumen corto: títulos, horarios y link del planner de Metricool.
+11. **SIEMPRE (desde el 01/11/2026): paquete para YouTube manual.** Diego sube a mano los mismos videos como Shorts a su
+    canal de YouTube de Clash (no por Metricool). Por cada video producido en la ejecución:
+    - `SendUserFile` con el .mp4 (`display: "attach"`, `status: "proactive"`) para que lo descargue en el celular.
+    - `SendUserMessage` con, por video: hora en que sale en TikTok, **Título para YouTube** (el mismo del TikTok, máx ~60
+      caracteres, 1-2 emojis) y **los 3 hashtags** (`#clashofclans` primero + los 2 del tema), más la descripción corta
+      lista para copiar. Indicar que lo suba después de la hora de TikTok (o cuando quiera).
+    - Si el video quedó en modo manual por cupo de Metricool, un solo mensaje con todo: subirlo a TikTok y a YouTube.
+    Esto aplica mientras Metricool publique en TikTok y también después, cuando todo sea manual: siempre video + título + 3 #.
 
 ## Reglas
 - Nunca repetir un tema del historial. Nunca publicar datos no verificados.
