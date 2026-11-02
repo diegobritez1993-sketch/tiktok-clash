@@ -50,6 +50,13 @@ Dejar programados en Metricool **2 videos por día: 13:00 y 20:00 (America/Asunc
    - `source="..."` en la escena donde aparece el dato (texto chico abajo).
    - **Audio: SIEMPRE música de fondo + efectos de sonido.** El motor genera solo una música gaming original y alegre
      (activa automáticamente desde el 01/11/2026) y los efectos de cada escena. No pasar `music=False` nunca.
+   - **VOZ EN OFF (SIEMPRE, desde el 03/11/2026)**: poner `vo="..."` en cada escena (menos el outro, que dice solo
+     "¡Seguime para más novedades de Clash!"). Voz masculina gratuita Piper (`motor/voz/`, se instala sola con pip).
+     Frases cortas en voseo que acompañen el texto en pantalla (no leer todo literal), ~2,5 palabras por segundo de escena.
+     Escribir los números con letras ("trece de noviembre", "Ayuntamiento diecinueve") y evitar siglas que la voz lea mal
+     (decir "Liga de guerras" en vez de "CWL", "TH diecinueve" o "Ayuntamiento diecinueve" en vez de "TH19"). En trivia, la
+     voz lee la pregunta y deja la cuenta regresiva sin hablar. Si la voz falla (piper no instala), el video sale igual sin voz:
+     avisarle a Diego en el resumen.
    - Titulares en MAYÚSCULAS y cortos; ítems de lista de máximo ~28 caracteres.
    - **Imágenes de Clash (SIEMPRE)**: cada video debe verse claramente de Clash of Clans. Usar las capturas propias
      de Diego de `capturas/` (ver `capturas/INDICE.md`): pasar `bg_pool=[3-4 capturas relacionadas al tema]` al

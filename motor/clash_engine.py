@@ -11,6 +11,9 @@ Un episodio es una lista de escenas (dicts). Cada escena dura `dur` segundos y t
   trivia    : q=["¿CUÁNTOS...", "...?"], options=["A) ...", "B) ...", "C) ..."], answer=1, source=""
               -> opciones, cuenta regresiva 3-2-1 y revela la correcta en verde (usar dur=7)
   outro     : (sin campos)  -> "SEGUÍ @misterd.coc"
+  vo="texto"  -> VOZ EN OFF de esa escena (voz masculina gratuita Piper "carlfm", motor/voz/). Frase corta en voseo,
+                que se pueda decir en dur-0.5 s (~2,5 palabras por segundo). Si no entra, se acelera un poco (máx. 1,45x).
+                El outro dice solo "¡Seguime para más novedades de Clash!" si no tiene vo. La música baja cuando habla.
 Campos comunes opcionales: color (índice de paleta 0-5), source (texto chico abajo), dur,
   bg="capturas/x.jpg"   -> fondo con una captura del juego (desenfocada, oscurecida, con zoom lento) en vez de rayos
   card="capturas/x.jpg" -> tarjeta con la captura (marco blanco, entra con rebote y hace zoom); card_y = centro vertical
@@ -335,6 +338,38 @@ def draw_scene(canvas, sc, lt, idx):
     if sc.get("source"):
         paste(canvas, fit("Fuente: " + sc["source"], 34, stroke=5, font=FM, fill=GREY), W / 2, 1585, ease_out((lt - 0.8) / 0.3) * out)
 
+# ---------------- voz en off (Piper, voz masculina gratuita "carlfm") ----------------
+VOICE = os.path.join(HERE, "voz", "es-carlfm-x-low.onnx")
+def _ensure_piper():
+    try:
+        import piper  # noqa
+        return True
+    except Exception:
+        r = subprocess.run([sys.executable, "-m", "pip", "install", "-q", "--break-system-packages", "piper-tts"],
+                           capture_output=True)
+        try:
+            import piper  # noqa
+            return True
+        except Exception:
+            print("AVISO: no se pudo instalar piper-tts; video sin voz en off", file=sys.stderr); return False
+def tts(text, room, SR=44100, base_speed=1.08):
+    """Devuelve la voz como array float32 (mono, SR), acelerada si hace falta para entrar en `room` segundos."""
+    if not os.path.exists(VOICE) or not _ensure_piper(): return None
+    import tempfile
+    d = tempfile.mkdtemp(); raw = os.path.join(d, "raw.wav"); out = os.path.join(d, "out.wav")
+    r = subprocess.run([sys.executable, "-m", "piper", "-m", VOICE, "-f", raw], input=text.encode(), capture_output=True)
+    if r.returncode or not os.path.exists(raw):
+        print("AVISO piper:", r.stderr.decode()[-300:], file=sys.stderr); return None
+    with wave.open(raw) as wf: dur0 = wf.getnframes() / wf.getframerate()
+    speed = min(1.45, max(base_speed, dur0 / max(room, 0.5)))
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", raw, "-af",
+                    f"atempo={speed:.3f},highpass=f=90,equalizer=f=3000:t=q:w=1.2:g=3,acompressor=threshold=-20dB:ratio=3,"
+                    f"aresample={SR}", "-ac", "1", out], check=True)
+    with wave.open(out) as wf: v = np.frombuffer(wf.readframes(wf.getnframes()), np.int16).astype(np.float32) / 32768
+    lim = int(room * SR)
+    if len(v) > lim: v = v[:lim]; v[-int(0.08 * SR):] *= np.linspace(1, 0, int(0.08 * SR))
+    return v / (np.abs(v).max() + 1e-9) * 0.9
+
 # ---------------- música de fondo original (chiptune gaming) ----------------
 MUSIC_FROM = "2026-11-01"   # la música se activa automáticamente desde esta fecha (hora de Paraguay)
 def music_enabled():
@@ -395,7 +430,7 @@ def make_music(total, seed, SR=44100):
 
 # ---------------- render ----------------
 class Episode:
-    def __init__(self, scenes, title="", bg_pool=None, music=None):
+    def __init__(self, scenes, title="", bg_pool=None, music=None, voice=None):
         self.scenes = []; t = 0.0; k = 0
         for i, sc in enumerate(scenes):
             sc = dict(sc); sc.setdefault("dur", 4.0); sc.setdefault("color", i)
@@ -404,6 +439,7 @@ class Episode:
             sc["t0"] = t; t += sc["dur"]; self.scenes.append(sc)
         self.total = t; self.title = title
         self.music = music_enabled() if music is None else music
+        self.voice = any(sc.get("vo") for sc in self.scenes) if voice is None else voice
     def scene_at(self, t):
         for i, sc in enumerate(self.scenes):
             if t < sc["t0"] + sc["dur"] or i == len(self.scenes) - 1: return i, sc
@@ -489,10 +525,24 @@ class Episode:
                 add(ding(), t0 + rv, 0.6); add(impact(0.7), t0 + rv, 0.8)
             if typ == "outro": add(pop(900), t0 + 0.5, 0.5); add(ding(), t0 + 0.8, 0.4)
         aud = aud / (np.abs(aud).max() + 1e-9)
+        vox = np.zeros(n, np.float32)
+        if self.voice:
+            for sc in self.scenes:
+                txt = sc.get("vo") or ("¡Seguime para más novedades de Clash!" if sc["type"] == "outro" else "")
+                if not txt: continue
+                at = sc["t0"] + sc.get("vo_t", 0.25); room = sc["dur"] - sc.get("vo_t", 0.25) - 0.2
+                v = tts(txt, room, SR)
+                if v is None: continue
+                i = int(at * SR); m = min(len(v), n - i); vox[i:i + m] += v[:m]
+        talking = np.convolve((np.abs(vox) > 0.02).astype(np.float32), np.ones(int(SR * 0.25)) / (SR * 0.25), "same")
+        duck = 1 - 0.6 * np.clip(talking * 3, 0, 1)
         if self.music:
             mus = make_music(self.total, __import__("zlib").crc32((self.title or "clash").encode()) % 100000, SR)
-            aud = aud * 0.8 + mus[:n] * 0.28
+            aud = aud * (0.8 - 0.3 * (1 - duck)) + mus[:n] * 0.28 * duck
             aud = np.tanh(aud * 1.1)
+        if self.voice and vox.any():
+            aud = aud / (np.abs(aud).max() + 1e-9) * 0.6 + vox * 0.95
+            aud = np.tanh(aud * 1.05)
         aud = aud / (np.abs(aud).max() + 1e-9) * 0.85
         pcm = (np.repeat(aud[:, None], 2, axis=1) * 32767).astype(np.int16)
         with wave.open(path, "wb") as wf:
