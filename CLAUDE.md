@@ -4,12 +4,14 @@ Cuenta de TikTok de Diego (Paraguay, zona America/Asuncion), creador de Clash of
 Español rioplatense/paraguayo con voseo ("mirá", "tenés", "dejalo"). Videos verticales 1080x1920, sin cara ni voz:
 motion graphics con texto + efectos de sonido, generados con `motor/clash_engine.py`.
 
-**SOLO TikTok.** Nunca programar estos videos en YouTube ni en otra red: el YouTube de la marca 7762882 es otro canal
-y otro nicho. PENDIENTE: Diego va a crear una segunda marca en Metricool con su canal de YouTube de Clash; cuando pase
-dato del nuevo brandId, se suben los MISMOS videos también como Shorts ahí (solo en esa marca nueva, nunca en la 7762882).
+**Dos destinos, dos marcas de Metricool (desde el 03/11/2026):**
+- Marca **7762882** ("misterd.coc") → **SOLO TikTok**. Su YouTube es OTRO canal y otro nicho: NUNCA programar Clash ahí.
+- Marca **7849138** ("Clash con mister") → YouTube de Clash (canal UC1ThKx6_pha-AnoBvPv0PUA): los MISMOS videos como Shorts,
+  a la misma hora que el TikTok.
 
 ## Tarea diaria (cada ejecución programada)
-Dejar programados en Metricool **2 videos por día: 13:00 y 20:00 (America/Asuncion)**, solo en TikTok.
+Dejar programados en Metricool **2 videos por día: 13:00 y 20:00 (America/Asuncion)**: TikTok (marca 7762882) +
+el mismo video como Short en YouTube de Clash (marca 7849138).
 1. `git pull`. Leer este archivo, `historial.md` completo (no repetir tema, dato ni gancho) y el calendario oficial
    del mes en `calendario/AAAA-MM.md` si existe (fechas de eventos confirmadas por Supercell: base para temas de eventos).
 2. Revisar con `getScheduledPosts` (brandId 7762882, timezone America/Asuncion, hoy y mañana) qué horarios de **TikTok**
@@ -94,18 +96,18 @@ Dejar programados en Metricool **2 videos por día: 13:00 y 20:00 (America/Asunc
      el link raw del mp4 y el recordatorio de marcar "contenido generado con IA" en TikTok. En historial.md poner
      "MANUAL" en la columna Hora junto a la hora. Si el cupo ya se agotó ese mes (un rechazo anterior en historial),
      ir directo a modo manual sin intentar Metricool. El cupo se renueva al empezar cada mes.
+   - **Short de YouTube (mismo video, misma hora)**: `createScheduledPost` con blogId `7849138`, providers
+     `[{"network":"youtube"}]`, media = la MISMA URL que se usó para TikTok, autoPublish true, draft false, text = el mismo
+     texto del TikTok (con sus 3 hashtags), `youtubeData`: `{"title":<mismo título>,"type":"short","privacy":"public",
+     "tags":[3-5 tags del tema + "clash of clans"],"category":"GAMING","madeForKids":false,"isAiGeneratedContent":false}`.
+     Antes, revisar con getScheduledPosts (brandId 7849138) que ese horario no esté ya ocupado. Si YouTube falla, no
+     reintentar: mandarle a Diego el video + título + 3 hashtags para que lo suba a mano.
 9. Agregar una fila por video a `historial.md` y hacer push.
-10. Mandar al usuario (SendUserMessage) un resumen corto: títulos, horarios y link del planner de Metricool.
-11. **SIEMPRE (desde el 01/11/2026): paquete para YouTube manual.** Diego sube a mano los mismos videos como Shorts a su
-    canal de YouTube de Clash (no por Metricool). Por cada video producido en la ejecución:
-    - `SendUserFile` con el .mp4 (`display: "attach"`, `status: "proactive"`) para que lo descargue en el celular.
-    - `SendUserMessage` con, por video: hora en que sale en TikTok, **Título para YouTube** (el mismo del TikTok, máx ~60
-      caracteres, 1-2 emojis) y **los 3 hashtags** (`#clashofclans` primero + los 2 del tema), más la descripción corta
-      lista para copiar. Indicar que lo suba después de la hora de TikTok (o cuando quiera).
-    - Si el video quedó en modo manual por cupo de Metricool, un solo mensaje con todo: subirlo a TikTok y a YouTube.
-    Esto aplica mientras Metricool publique en TikTok y también después, cuando todo sea manual: siempre video + título + 3 #.
+10. Mandar al usuario (SendUserMessage) un resumen corto: títulos, horarios, que quedaron en TikTok y en YouTube, y link del planner.
+11. (Ya NO se manda el paquete manual para YouTube: desde el 03/11/2026 los Shorts se programan solos en la marca 7849138.
+    Solo si falla Metricool, mandar video + título + 3 hashtags como respaldo.)
 
 ## Reglas
 - Nunca repetir un tema del historial. Nunca publicar datos no verificados.
-- No borrar videos ni publicaciones existentes, ni tocar los posts de YouTube.
+- No borrar videos ni publicaciones existentes, ni tocar los posts de YouTube del otro nicho (marca 7762882).
 - Si algo falla (push denegado, Metricool rechaza el video), no reintentar en bucle: dejar el video en el repo y avisar al usuario.
