@@ -87,7 +87,7 @@ Dejar programados en Metricool **2 videos por día: 13:00 y 20:00 (America/Asunc
    - `text`: 1-2 frases + pregunta para comentar + (si hay dato) "Fuente: ..." + hashtags.
    - **Hashtags: EXACTAMENTE 3**, al final del texto. El primero SIEMPRE `#clashofclans`; los otros 2 relacionados
      con el tema del video (ej. `#clashofclans #cwl #clashtips`, `#clashofclans #cambiosdebalance #supercell`).
-   - **Plan gratis de Metricool (20 publicaciones/mes, compartidas con el YouTube del otro nicho)**: si `createScheduledPost`
+   - **Metricool: desde el 03/11/2026 Diego tiene plan Starter (hasta 5 marcas)**. Programar normal. Solo si `createScheduledPost`
      falla por límite/cupo/plan (o cualquier rechazo), NO reintentar. Pasar a **modo manual**: el video ya está en el repo;
      mandarlo con `SendUserFile` (el .mp4, para que Diego lo descargue en el celular) y con `SendUserMessage` un mensaje
      listo para copiar: hora a la que tiene que subirlo (13:00 o 20:00), TÍTULO, TEXTO completo con los 3 hashtags,
