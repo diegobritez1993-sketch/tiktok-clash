@@ -228,7 +228,7 @@ def cap_card(path, width=900):
 CLASH_TAG = None
 def clash_tag():
     global CLASH_TAG
-    if CLASH_TAG is None: CLASH_TAG = pill("CLASH OF CLANS", (230, 160, 0), 46, (20, 20, 30))
+    if CLASH_TAG is None: CLASH_TAG = pill("CLASH OF CLANS", (214, 140, 0), 46, WHITE)
     return CLASH_TAG
 
 # ---------------- escenas ----------------

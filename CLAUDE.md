@@ -107,6 +107,30 @@ el mismo video como Short en YouTube de Clash (marca 7849138).
 11. (Ya NO se manda el paquete manual para YouTube: desde el 03/11/2026 los Shorts se programan solos en la marca 7849138.
     Solo si falla Metricool, mandar video + título + 3 hashtags como respaldo.)
 
+## Trivia LARGA para YouTube (desde el 05/11/2026): JUEVES y DOMINGO a las 18:00
+Además de los 2 videos diarios (que siguen igual en TikTok + Shorts), los **jueves y domingos** la ejecución diaria
+produce UNA trivia larga **horizontal 16:9 (~4 min)** SOLO para YouTube de Clash (marca 7849138), a las **18:00** de ese día.
+- Motor: `motor/trivia_larga.py` (ver docstring). Episodio en `episodios/AAAA-MM-DD_1800_trivia-larga-<tema>.py`
+  copiando `episodios/2026-11-05_1800_trivia-larga-historia.py`. Por pregunta: 10 s pregunta + 30 s cuenta regresiva +
+  6 s respuesta. **5 preguntas** (≈4:08). Intro + outro con voz. Música, efectos y voz en off automáticos.
+- Cada pregunta: 3 opciones, UNA correcta **verificada** con fuente (`source`), `vo` (lee pregunta y opciones, números en
+  letras, cabe en ~9 s), `dato` (dato corto en pantalla) y `vo_dato` ("¡La be! ..."), `sticker` del kit y `bg` (preferir
+  artes 16:9 del kit: arte_aniversario_*, arte_coliseo_*, arte_batalla_*, humor_*). Temas variados por trivia (historia,
+  tropas, eventos, Supercell, curiosidades); NO repetir preguntas de trivias anteriores (ver historial).
+- Revisar con `preview` (mirar hoja.jpg y miniatura.jpg). `build publicados/<nombre>.mp4` genera también
+  `publicados/<nombre>_miniatura.jpg` (render ~10 min). Commit + push de mp4 y miniatura, verificar URLs con curl.
+- Programar con `createScheduledPost` blogId `7849138`, providers `[{"network":"youtube"}]`, fecha 18:00 -03:00,
+  media `[url raw del mp4]`, `videoThumbnailUrl` = url raw de la miniatura (si Metricool la rechaza con
+  VIDEO_THUMBNAIL_NOT_APPLICABLE, reintentar UNA vez sin miniatura y mandarle la miniatura a Diego para subirla en
+  YouTube Studio), `youtubeData`: `{"title":..., "type":"video","privacy":"public","tags":[5-8],"category":"GAMING",
+  "madeForKids":false,"isAiGeneratedContent":false}`.
+  Título YouTube (máx ~70 caracteres): tipo "TRIVIA de CLASH OF CLANS: ¿Acertás las 5? 🧠 | <tema>".
+  Descripción: 1-2 frases + "¿Cuántas acertaste? Comentá tu puntaje" + **capítulos** (0:00 Intro, 0:08 Pregunta 1,
+  0:54 Pregunta 2, 1:40 Pregunta 3, 2:26 Pregunta 4, 3:12 Pregunta 5, 3:58 Resultado) + "Fuentes: ..." + 3 hashtags
+  (`#clashofclans #trivia #<tema>`).
+- historial.md: una fila con Pilar "Trivia larga (YouTube)" y las 5 preguntas resumidas.
+- NO va a TikTok ni a la marca 7762882.
+
 ## Reglas
 - Nunca repetir un tema del historial. Nunca publicar datos no verificados.
 - No borrar videos ni publicaciones existentes, ni tocar los posts de YouTube del otro nicho (marca 7762882).
